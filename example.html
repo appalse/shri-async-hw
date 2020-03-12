@@ -16,27 +16,33 @@
         sqrt
     } = Homework;
 
-    function promiseVectorLength(v) {
-        return new Promise((resolve, reject) => {
-            v.length((result) => {
-                resolve(result);
-            });
-        });
+    function promisify(f) {
+        return function(method, ...args) {
+            return new Promise((resolve, reject) => {
+                function cb(result) {
+                    if (result) resolve(result);
+                };
+                args.push(cb);
+                method.call(this, ...args);
+            })
+        };
+    }
+
+    async function promiseVectorLength(v) {
+        var len = 0;
+        await v.length((result) => { len = result; });
+        return len;
     }
 
     function promiseVectorItem(v, index) {
         return new Promise((resolve, reject) => {
-            v.get(index, (result) => {
-                resolve(result);
-            });
+            v.get(index, (result) => { resolve(result); });
         });
     }
 
     function promiseVectorPush(v, item) {
         return new Promise((resolve, reject) => {
-            v.push(item, () => {
-                resolve();
-            });
+            v.push(item, () => { resolve(); });
         });
     }
 
@@ -52,7 +58,6 @@
         }
         return Promise.all(promises);
     }).then(coordinatesPairs => {
-        
         var promises = [];
         for(var i = 0; i < coordinatesPairs.length; i++) {
             promises.push(promiseVectorPush(sumOfVectors, coordinatesPairs[i][0] + coordinatesPairs[i][1]));
