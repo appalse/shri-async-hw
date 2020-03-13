@@ -28,11 +28,12 @@
         };
     }
 
-    async function promiseVectorLength(v) {
-        var len = 0;
-        await v.length((result) => { len = result; });
-        return len;
+    function promiseVectorLength(v) {
+        return new Promise((resolve, reject) => {
+            v.length(result => { resolve(result); });
+        });
     }
+    
 
     function promiseVectorItem(v, index) {
         return new Promise((resolve, reject) => {
@@ -40,9 +41,9 @@
         });
     }
 
-    function promiseVectorPush(v, item) {
+    function promiseVectorSet(v, index, value) {
         return new Promise((resolve, reject) => {
-            v.push(item, () => { resolve(); });
+            v.set(index, value, () => { resolve(); });
         });
     }
 
@@ -60,7 +61,7 @@
     }).then(coordinatesPairs => {
         var promises = [];
         for(var i = 0; i < coordinatesPairs.length; i++) {
-            promises.push(promiseVectorPush(sumOfVectors, coordinatesPairs[i][0] + coordinatesPairs[i][1]));
+            promises.push(promiseVectorSet(sumOfVectors, i, coordinatesPairs[i][0] + coordinatesPairs[i][1]));
         }
         return Promise.all(promises);
     }).then(result => {
