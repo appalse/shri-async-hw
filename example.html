@@ -17,56 +17,41 @@
     } = Homework;
 
     function promisify(f) {
-        return function(method, ...args) {
+        return function(...args) {
             return new Promise((resolve, reject) => {
                 function cb(result) {
-                    if (result) resolve(result);
+                    if (result) resolve(result)
+                    else resolve();
                 };
                 args.push(cb);
-                method.call(this, ...args);
+                f.call(this, ...args);
             })
         };
-    }
-
-    function promiseVectorLength(v) {
-        return new Promise((resolve, reject) => {
-            v.length(result => { resolve(result); });
-        });
-    }
-    
-
-    function promiseVectorItem(v, index) {
-        return new Promise((resolve, reject) => {
-            v.get(index, (result) => { resolve(result); });
-        });
-    }
-
-    function promiseVectorSet(v, index, value) {
-        return new Promise((resolve, reject) => {
-            v.set(index, value, () => { resolve(); });
-        });
     }
 
     var sumOfVectors = new AsyncArray([]);
 
     function summarizeVectors(v1, v2, cb) {
-        Promise.all([promiseVectorLength(v1), promiseVectorLength(v2)]).then(lengthValues => {
-        const len = lengthValues[0];
-        var promises = [];
-        for (var i = 0; i < len; i++) {
-            var p = Promise.all([promiseVectorItem(v1, i), promiseVectorItem(v2, i)]);
-            promises.push(p);
-        }
-        return Promise.all(promises);
-    }).then(coordinatesPairs => {
-        var promises = [];
-        for(var i = 0; i < coordinatesPairs.length; i++) {
-            promises.push(promiseVectorSet(sumOfVectors, i, coordinatesPairs[i][0] + coordinatesPairs[i][1]));
-        }
-        return Promise.all(promises);
-    }).then(result => {
-        cb(sumOfVectors);
-    });
+        Promise.all([promisify(v1.length)(), promisify(v2.length)()]).then(lengthValues => {
+            const len = lengthValues[0];
+            var promises = [];
+            for (var i = 0; i < len; i++) {
+                var p = Promise.all([promisify(v1.get)(i), promisify(v2.get)(i)]);
+                promises.push(p);
+            }
+            return Promise.all(promises);
+        }).then(coordinatesPairs => {
+            var promises = [];
+            for(var i = 0; i < coordinatesPairs.length; i++) {
+                var p = promisify(sumOfVectors.set)(i, coordinatesPairs[i][0] + coordinatesPairs[i][1]);
+                promises.push(p);
+            }
+            return Promise.all(promises);
+        }).then(result => {
+            cb(sumOfVectors);
+        }).catch(error => {
+            console.log('Error: ', error)
+        });
         
     }
 
