@@ -2,13 +2,18 @@
 
 Решение в файле [example.html](example.html) и на [github pages](https://appalse.github.io/shri-async-hw/example.html).
 
-Пример вызова:
+Пример вызова из кода скрипта:
 ```
 const vec1 = new AsyncArray([1, 2, 3]);
 const vec2 = new AsyncArray([1, 2, 3]);
 summarizeVectors(vec1, vec2, (result) => {
     result.print();
 });
+```
+
+Пример вызова из консоли:
+```
+summarizeVectors(new AsyncArray([20, 10, 40, 50, 50]), new AsyncArray([80, -10, 60, -50, 50]), res => res.print());
 ```
 
 ## Задание
