@@ -6,61 +6,83 @@
     const {
         AsyncArray,
         add,
-        subtract,
-        multiply,
-        divide,
-        mod,
         less,
-        equal,
-        lessOrEqual,
-        sqrt
+        equal
     } = Homework;
 
     function promisify(f) {
         return function(...args) {
             return new Promise((resolve, reject) => {
                 function cb(result) {
-                    if (result) resolve(result)
-                    else resolve();
+                    resolve(result);
                 };
-                args.push(cb);
-                f.call(this, ...args);
-            })
+                f(...args, cb);
+            });
         };
     }
-
-    var sumOfVectors = new AsyncArray([]);
-
-    function summarizeVectors(v1, v2, cb) {
-        Promise.all([promisify(v1.length)(), promisify(v2.length)()]).then(lengthValues => {
-            const len = lengthValues[0];
-            var promises = [];
-            for (var i = 0; i < len; i++) {
-                var p = Promise.all([promisify(v1.get)(i), promisify(v2.get)(i)]);
-                promises.push(p);
-            }
-            return Promise.all(promises);
-        }).then(coordinatesPairs => {
-            var promises = [];
-            for(var i = 0; i < coordinatesPairs.length; i++) {
-                var p = promisify(sumOfVectors.set)(i, coordinatesPairs[i][0] + coordinatesPairs[i][1]);
-                promises.push(p);
-            }
-            return Promise.all(promises);
-        }).then(result => {
-            cb(sumOfVectors);
-        }).catch(error => {
-            console.log('Error: ', error)
+    const promiseLess = promisify(less);
+    const promiseAdd = promisify(add);
+    const promiseEqual = promisify(equal);
+    const promiseLength = function(vec) {
+        return new Promise((resolve, reject) => {
+            function cb(result) {
+                resolve(result);
+            };
+            vec.length(cb);
         });
-        
-    }
+    };
+    const promisePush = function(vec, value) {
+        return new Promise((resolve, reject) => {
+            vec.push(value, resolve);
+        });
+    };
+    const promiseGet = function(vec, index) {
+        return new Promise((resolve, reject) => {
+            function cb(result) {
+                resolve(result);
+            };
+            vec.get(index, cb);
+        });
+    }; 
 
+    async function summarizeVectors(v1, v2, cb) {
+        const length1 = await promiseLength(v1);
+        const length2 = await promiseLength(v2);
+        if (!(await promiseEqual(length1,length2))) {
+            throw new Error('Arrays length should be equal');
+        }
+        const len = length1;
+        var sumOfVectors = new AsyncArray([]);
+        var i = 0;
+        while (await promiseLess(i, len)) {
+            const item1 = await promiseGet(v1, i);
+            const item2 = await promiseGet(v2, i);
+            const sum = await promiseAdd(item1, item2);
+            await promisePush(sumOfVectors, sum);
+            i = await promiseAdd(i, 1);
+        }
+        cb(sumOfVectors);
+    }
 
     const vec1 = new AsyncArray([1, 2, 3]);
     const vec2 = new AsyncArray([1, 2, 3]);
-    console.log('сложение векторов начато');
     summarizeVectors(vec1, vec2, (result) => {
-        console.log('сложение векторов выполнено: ');
+        //console.log('сложение векторов выполнено: ожидается [2, 4, 6]');
+        result.print();
+    });
+
+    const vec3 = new AsyncArray([1, 2]);
+    const vec4 = new AsyncArray([-1, -2]);
+    summarizeVectors(vec3, vec4, (result) => {
+        //console.log('сложение векторов выполнено: ожидается [0, 0]');
+        result.print();
+    });
+    
+
+    const vec5 = new AsyncArray([10]);
+    const vec6 = new AsyncArray([0]);
+    summarizeVectors(vec5, vec6, (result) => {
+        //console.log('сложение векторов выполнено: ожидается [10]');
         result.print();
     });
 
