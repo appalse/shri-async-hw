@@ -1,7 +1,15 @@
-# Домашняя работа "Асинхронность"
+# Домашняя работа "Асинхронность" Вариант 3
 
-Решение в файле [example.html](example.html) .
+Решение в файле [example.html](example.html) и на [github pages](https://appalse.github.io/shri-async-hw/example.html).
 
+Пример вызова:
+```
+const vec1 = new AsyncArray([1, 2, 3]);
+const vec2 = new AsyncArray([1, 2, 3]);
+summarizeVectors(vec1, vec2, (result) => {
+    result.print();
+});
+```
 
 ## Задание
 
@@ -16,19 +24,4 @@
 function(v1: AsyncArray, v2: AsyncArray, cb: (result: AsyncArray) => void) {
 
 }
-```
-
-
-## Бонусное задание
-
-Реализовать в отдельном файле собственную версию методов:
-
-- [Promise.any](https://developer.mozilla.org/ru/docs/Web/JavaScript/Reference/Global_Objects/Promise/any)
-- [Promise.allSettled](https://developer.mozilla.org/ru/docs/Web/JavaScript/Reference/Global_Objects/Promise/allSettled)
-- [Promise.prototype.finally](https://developer.mozilla.org/ru/docs/Web/JavaScript/Reference/Global_Objects/Promise/finally)
-
-```js
-Promise._any = // реализация
-Promise._allSettled = // реализация
-Promise.prototype._finally = // реализация
 ```
